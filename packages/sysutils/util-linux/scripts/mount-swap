@@ -24,7 +24,7 @@ SWAP=`blkid -t TYPE="swap" -o device`
 
 case $1 in
   create)
-    if [ -z "$SWAP" -a ! -f "$SWAPFILE" ]; then
+    if [ -z "${SWAP}" -o -e "/dev/zram0" ] && [ ! -f "${SWAPFILE}" ]; then
       mkdir -p `dirname $SWAPFILE`
       dd if=/dev/zero of=$SWAPFILE bs=1M count=$SWAPFILESIZE
       chmod 0600 $SWAPFILE
@@ -32,7 +32,7 @@ case $1 in
     fi
     ;;
   mount)
-    [ -z "$SWAP" -a -f "$SWAPFILE" ] && SWAP=$SWAPFILE
+    { [ -z "${SWAP}" -o -e "/dev/zram0" ] && [ -f "${SWAPFILE}" ]; } && SWAP="${SWAPFILE}"
     for i in $SWAP; do
       swapon -p 10000 $i
     done

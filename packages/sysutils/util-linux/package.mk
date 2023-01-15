@@ -54,7 +54,8 @@ PKG_CONFIGURE_OPTS_TARGET="${UTILLINUX_CONFIG_DEFAULT} \
                            --enable-fsck \
                            --enable-fstrim \
                            --enable-blkid \
-                           --enable-lscpu"
+                           --enable-lscpu \
+                           --enable-zramctl"
 
 if [ "${SWAP_SUPPORT}" = "yes" ]; then
   PKG_CONFIGURE_OPTS_TARGET+=" --enable-swapon"
@@ -81,12 +82,16 @@ post_makeinstall_target() {
   if [ "${SWAP_SUPPORT}" = "yes" ]; then
     mkdir -p ${INSTALL}/usr/lib/libreelec
       cp -PR ${PKG_DIR}/scripts/mount-swap ${INSTALL}/usr/lib/libreelec
+      cp -PR ${PKG_DIR}/scripts/zramctrl.trimoon ${INSTALL}/usr/lib/libreelec
 
     mkdir -p ${INSTALL}/etc
       cat ${PKG_DIR}/config/swap.conf | \
         sed -e "s,@SWAPFILESIZE@,${SWAPFILESIZE},g" \
             -e "s,@SWAP_ENABLED_DEFAULT@,${SWAP_ENABLED_DEFAULT},g" \
             > ${INSTALL}/etc/swap.conf
+
+    mkdir -p ${INSTALL}/usr/config
+    cp -PR ${PKG_DIR}/config/zramswap.conf ${INSTALL}/etc
   fi
 }
 
@@ -94,4 +99,5 @@ post_install () {
   if [ "${SWAP_SUPPORT}" = "yes" ]; then
     enable_service swap.service
   fi
+  enable_service zramswap-trimoon.service
 }

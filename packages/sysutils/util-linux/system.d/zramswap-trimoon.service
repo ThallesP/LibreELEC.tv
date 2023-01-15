@@ -1,0 +1,22 @@
+[Unit]
+Description=Zram-based swap (compressed RAM block devices)
+Documentation=https://forum.manjaro.org/t/improved-zramswap/34767
+DefaultDependencies=no
+
+After=swap.target swap.service
+Conflicts=shutdown.target
+
+ConditionPathExists=/proc/swaps
+ConditionKernelCommandLine=!noswap
+ConditionKernelCommandLine=!installer
+
+[Service]
+Environment=HOME=/storage
+Type=oneshot
+ExecStart=/usr/lib/libreelec/zramctrl.trimoon start
+ExecStop=/usr/lib/libreelec/zramctrl.trimoon stop
+RemainAfterExit=yes
+TimeoutStartSec=60sec
+
+[Install]
+WantedBy=swap.target
